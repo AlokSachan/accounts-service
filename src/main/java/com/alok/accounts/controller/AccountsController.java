@@ -2,7 +2,6 @@ package com.alok.accounts.controller;
 
 import com.alok.accounts.adaptor.AccountAdaptor;
 import com.alok.accounts.model.AccountsDto;
-import com.alok.accounts.model.CustomerDto;
 import com.alok.accounts.service.AccountsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
