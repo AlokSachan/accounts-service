@@ -27,7 +27,6 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: default
       SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/       
 
      
   accounts:
@@ -48,13 +47,14 @@ services:
     environment:
         SPRING_PROFILES_ACTIVE: default
         SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+        EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
 
 
   loans:
     image: aloksachan/loans-service:latest
     mem_limit: 700m
     ports:
-      - "8090:8090"
+      - "8090-8091:8090"
     networks:
       - eazybank-network
     depends_on:
@@ -68,6 +68,7 @@ services:
     environment:
         SPRING_PROFILES_ACTIVE: default
         SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+        EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
 
   cards:
     image: aloksachan/cards-service:latest
@@ -87,6 +88,7 @@ services:
     environment:
         SPRING_PROFILES_ACTIVE: default
         SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+        EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
  
    
 networks:

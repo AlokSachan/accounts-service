@@ -21,5 +21,5 @@ public class LoansDto {
     private int amountPaid;
     private int outstandingAmount;
     private String createDt;
-
+    private Integer port;
 }
