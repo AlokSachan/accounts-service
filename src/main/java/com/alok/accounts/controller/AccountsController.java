@@ -2,10 +2,6 @@ package com.alok.accounts.controller;
 
 import com.alok.accounts.adaptor.AccountAdaptor;
 import com.alok.accounts.config.AccountsServiceConfig;
-import com.alok.accounts.feign.client.CardsFeignClient;
-import com.alok.accounts.feign.client.LoansFeignClient;
-import com.alok.accounts.feign.response.CardsDto;
-import com.alok.accounts.feign.response.LoansDto;
 import com.alok.accounts.model.AccountsDto;
 import com.alok.accounts.model.CustomerDetailsDto;
 import com.alok.accounts.model.Properties;
@@ -13,16 +9,19 @@ import com.alok.accounts.service.AccountsService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 
 @RestController
+@Slf4j
 public class AccountsController {
 
     @Autowired
@@ -51,7 +50,29 @@ public class AccountsController {
     }
 
     @GetMapping(value = "/myAccount/customerDetails/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CustomerDetailsDto> getCustomerDetails(@PathVariable Integer customerId){
-        return new ResponseEntity<>(accountsService.customerDetails(customerId), HttpStatus.OK);
+    //@CircuitBreaker(name = "customerDetailsSupportApp", fallbackMethod = "getCustomerDetailsFallBack")
+   // @Retry(name = "retryForCustomerDetails", fallbackMethod = "getCustomerDetailsFallBack")
+    @Retry(name = "retryForCustomerDetails")
+    public ResponseEntity<CustomerDetailsDto> getCustomerDetails(@PathVariable Integer customerId,
+                                                                 @RequestHeader("eazybank-correlation-id")  String correlationId){
+        log.info("correlationId : {}", correlationId);
+        return new ResponseEntity<>(accountsService.customerDetails(customerId, correlationId), HttpStatus.OK);
     }
+
+    private ResponseEntity<CustomerDetailsDto> getCustomerDetailsFallBack(Integer customerId, Throwable th,
+                                                                          @RequestHeader("eazybank-correlation-id")  String correlationId){
+        log.info("inside Fall Back Method");
+        return new ResponseEntity<>(accountsService.getCustomerDetailsFallBack(customerId, correlationId), HttpStatus.OK);
+    }
+
+    @GetMapping("/sayHello")
+    @RateLimiter(name = "sayHello", fallbackMethod = "sayHelloFallback")
+    public String sayHello() {
+        return "Hello, Welcome to EazyBank";
+    }
+
+    private String sayHelloFallback(Throwable t) {
+        return "Hi, Welcome to EazyBank";
+    }
+
 }

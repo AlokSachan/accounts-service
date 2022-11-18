@@ -6,6 +6,7 @@ import com.alok.accounts.feign.client.CardsFeignClient;
 import com.alok.accounts.feign.client.LoansFeignClient;
 import com.alok.accounts.feign.response.CardsDto;
 import com.alok.accounts.feign.response.LoansDto;
+import com.alok.accounts.model.AccountsDto;
 import com.alok.accounts.model.CustomerDetailsDto;
 import com.alok.accounts.repository.AccountsRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -39,15 +40,24 @@ public class AccountsServiceImpl implements AccountsService {
     }
 
     @Override
-    public CustomerDetailsDto customerDetails(Integer customerId) {
+    public CustomerDetailsDto customerDetails(Integer customerId, String correlationId) {
         Accounts accountDetails = getAccountDetails(customerId);
-        List<CardsDto> cardDetails = cardsFeignClient.getCardDetails(customerId);
-        log.info("cardsFeignClient response {}", cardDetails.size());
-        List<LoansDto> loansDetails = loansFeignClient.getLoansDetails(customerId);
+        List<LoansDto> loansDetails = loansFeignClient.getLoansDetails(customerId, correlationId);
         log.info("loansFeignClient response {}", loansDetails.size());
+        List<CardsDto> cardDetails = cardsFeignClient.getCardDetails(customerId, correlationId);
+        log.info("cardsFeignClient response {}", cardDetails.size());
        return CustomerDetailsDto.builder()
                 .accounts(accountAdaptor.adapt(accountDetails))
                 .cards(cardDetails)
+                .loans(loansDetails).build();
+    }
+
+    @Override
+    public CustomerDetailsDto getCustomerDetailsFallBack(Integer customerId,String correlationId) {
+        Accounts accountDetails = getAccountDetails(customerId);
+        List<LoansDto> loansDetails = loansFeignClient.getLoansDetails(customerId, correlationId);
+        return CustomerDetailsDto.builder()
+                .accounts(accountAdaptor.adapt(accountDetails))
                 .loans(loansDetails).build();
     }
 }

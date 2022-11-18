@@ -8,5 +8,7 @@ public interface AccountsService {
 
     Accounts getAccountDetails(int customerId);
 
-    CustomerDetailsDto customerDetails(Integer customerId);
+    CustomerDetailsDto customerDetails(Integer customerId, String correlationId);
+
+    CustomerDetailsDto getCustomerDetailsFallBack(Integer customerId, String correlationId);
 }
