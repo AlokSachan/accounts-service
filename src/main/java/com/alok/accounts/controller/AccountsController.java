@@ -55,6 +55,8 @@ public class AccountsController {
     @Retry(name = "retryForCustomerDetails")
     public ResponseEntity<CustomerDetailsDto> getCustomerDetails(@PathVariable Integer customerId,
                                                                  @RequestHeader("eazybank-correlation-id")  String correlationId){
+
+        log.info("getCustomerDetails method is started for {}", customerId);
         log.info("correlationId : {}", correlationId);
         return new ResponseEntity<>(accountsService.customerDetails(customerId, correlationId), HttpStatus.OK);
     }
