@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
+import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,7 @@ public class AccountsController {
     private AccountsServiceConfig accountsServiceConfig;
 
     @GetMapping("/myAccount/{customerId}")
+    @Timed(value = "getAccountDetails.time", description = "Time taken to return account detail")
     public ResponseEntity<AccountsDto> getAccountDetails(@PathVariable int customerId) {
 
        return new ResponseEntity<>(accountAdaptor.adapt(accountsService.getAccountDetails(customerId)), HttpStatus.OK);
